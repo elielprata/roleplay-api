@@ -73,5 +73,5 @@ test.group('Session', (group) => {
     const token = await Database.query().select('*').from('api_tokens')
 
     assert.isEmpty(token)
-  }).pin()
+  })
 })
