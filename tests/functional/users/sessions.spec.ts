@@ -55,11 +55,14 @@ test.group('Session', (group) => {
 
   test('it should return 200 when user signs out', async ({ client, assert }) => {
     const plainPassword = 'test'
-    const { email } = await UserFactory.merge({ password: plainPassword }).create()
-    const response = await client.post('/sessions').json({
-      email,
-      password: plainPassword,
-    })
+    const user = await UserFactory.merge({ password: plainPassword }).create()
+    const response = await client
+      .post('/sessions')
+      .json({
+        email: user.email,
+        password: plainPassword,
+      })
+      .loginAs(user)
     response.assertStatus(201)
 
     const apiToken = response.body().token
@@ -69,9 +72,25 @@ test.group('Session', (group) => {
       .header('Authorization', `Bearer ${apiToken.token}`)
 
     logout.assertStatus(200)
+  })
+
+  test('it should revoke when user signs out', async ({ client, assert }) => {
+    const plainPassword = 'test'
+    const user = await UserFactory.merge({ password: plainPassword }).create()
+    /* const response = await client.post('/sessions').json({
+      email: user.email,
+      password: plainPassword,
+    })
+    response.assertStatus(201)
+
+    const apiToken = response.body().token
+ */
+    const logout = await client.delete('/sessions').loginAs(user)
+
+    logout.assertStatus(200)
 
     const token = await Database.query().select('*').from('api_tokens')
 
     assert.isEmpty(token)
-  })
+  }).pin()
 })

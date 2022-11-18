@@ -92,11 +92,14 @@ test.group('User', (group) => {
     const email = 'test@test.com'
     const avatar = 'htpps://image.com/img/1'
 
-    const response = await client.put(`/users/${user.id}`).json({
-      email,
-      avatar,
-      password: user.password,
-    })
+    const response = await client
+      .put(`/users/${user.id}`)
+      .json({
+        email,
+        avatar,
+        password: user.password,
+      })
+      .loginAs(user)
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -112,11 +115,14 @@ test.group('User', (group) => {
     const user = await UserFactory.create()
     const password = 'test'
 
-    const response = await client.put(`/users/${user.id}`).json({
-      email: user.email,
-      avatar: user.avatar,
-      password,
-    })
+    const response = await client
+      .put(`/users/${user.id}`)
+      .json({
+        email: user.email,
+        avatar: user.avatar,
+        password,
+      })
+      .loginAs(user)
 
     response.assertStatus(200)
     assert.equal(response.body().user.id, user.id)
@@ -126,8 +132,8 @@ test.group('User', (group) => {
   })
 
   test('it should return 422 when required data is not provided', async ({ client, assert }) => {
-    const { id } = await UserFactory.create()
-    const response = await client.put(`/users/${id}`).json({})
+    const user = await UserFactory.create()
+    const response = await client.put(`/users/${user.id}`).json({}).loginAs(user)
 
     response.assertStatus(422)
     assert.equal(response.body().code, 'BAD_REQUEST')
@@ -135,11 +141,14 @@ test.group('User', (group) => {
 
   test('it should return 422 when providing an invalid email', async ({ client, assert }) => {
     const user = await UserFactory.create()
-    const response = await client.put(`/users/${user.id}`).json({
-      password: user.password,
-      email: 'test@',
-      avatar: user.avatar,
-    })
+    const response = await client
+      .put(`/users/${user.id}`)
+      .json({
+        password: user.password,
+        email: 'test@',
+        avatar: user.avatar,
+      })
+      .loginAs(user)
 
     response.assertStatus(422)
     assert.equal(response.body().code, 'BAD_REQUEST')
@@ -147,11 +156,14 @@ test.group('User', (group) => {
 
   test('it should return 422 when providing an invalid password', async ({ client, assert }) => {
     const user = await UserFactory.create()
-    const response = await client.put(`/users/${user.id}`).json({
-      password: '123',
-      email: user.email,
-      avatar: user.avatar,
-    })
+    const response = await client
+      .put(`/users/${user.id}`)
+      .json({
+        password: '123',
+        email: user.email,
+        avatar: user.avatar,
+      })
+      .loginAs(user)
 
     response.assertStatus(422)
     assert.equal(response.body().code, 'BAD_REQUEST')
@@ -159,11 +171,14 @@ test.group('User', (group) => {
 
   test('it should return 422 when providing an invalid avatar', async ({ client, assert }) => {
     const user = await UserFactory.create()
-    const response = await client.put(`/users/${user.id}`).json({
-      password: user.password,
-      email: user.email,
-      avatar: 'htps:/aa.com',
-    })
+    const response = await client
+      .put(`/users/${user.id}`)
+      .json({
+        password: user.password,
+        email: user.email,
+        avatar: 'htps:/aa.com',
+      })
+      .loginAs(user)
 
     response.assertStatus(422)
     assert.equal(response.body().code, 'BAD_REQUEST')
