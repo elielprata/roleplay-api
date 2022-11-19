@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon'
 import {
   BaseModel,
   belongsTo,
@@ -6,9 +5,13 @@ import {
   column,
   manyToMany,
   ManyToMany,
+  ModelQueryBuilderContract,
+  scope,
 } from '@ioc:Adonis/Lucid/Orm'
 import User from 'App/Models/User'
+import { DateTime } from 'luxon'
 
+type Builder = ModelQueryBuilderContract<typeof Group>
 export default class Group extends BaseModel {
   @column({ isPrimary: true })
   public id: number
@@ -46,4 +49,14 @@ export default class Group extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  public static withPlayer = scope((query: Builder, userId: number) => {
+    query.whereHas('players', (query) => {
+      query.where('id', userId)
+    })
+  })
+
+  public static whereNameOrDescription = scope((query: Builder, text: string) => {
+    query.where('name', 'LIKE', `%${text}%`).orWhere('description', 'LIKE', `%${text}%`)
+  })
 }
