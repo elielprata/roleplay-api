@@ -1,5 +1,3 @@
-# roleplay-api
-
 # **Roleplay - API**
 
 ## Sobre
